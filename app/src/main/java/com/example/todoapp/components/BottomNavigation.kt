@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.todoapp.screens.calendar.Calendar
 import com.example.todoapp.screens.menuApp.MenuMainScreen
 import com.example.todoapp.screens.profile.ProfileMainScreen
+import com.example.todoapp.screens.registration.RegistrationScreen
 import com.example.todoapp.screens.tasks.TasksMainScreen
 
 @Composable
@@ -50,6 +51,10 @@ fun NavHostConteiner (
             // route : menu
             composable("Menu") {
                 MenuMainScreen()
+            }
+            composable("Registration") {
+                RegistrationScreen()
+
             }
         }
     )

@@ -46,11 +46,14 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
 
     // Compose dependencies
-    implementation("androidx.compose.ui:ui:1.5.0")
-    implementation("androidx.compose.material3:material3:1.3.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.5.0")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.ui:ui-text")
+    implementation(platform("androidx.compose:compose-bom:2025.01.01"))
+
+
 
     // Retrofit + Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -77,7 +80,6 @@ dependencies {
 
     //GoogleFonts
     implementation(libs.compose.ui.text.google.fonts)
-    implementation ("androidx.compose.ui:ui-text:1.5.0")
 
     implementation("androidx.navigation:navigation-compose:2.8.8")
 

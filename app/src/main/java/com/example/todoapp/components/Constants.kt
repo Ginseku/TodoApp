@@ -28,6 +28,13 @@ object Constants {
             label = "Mine",
             icon = R.drawable.mine_side,
             route = "Mine"
+        ),
+        // Registration screen
+        BottomNavigationItems(
+            label = "Registration",
+            icon = R.drawable.baseline_app_registration_24,
+            route = "Registration"
+
         )
     )
 }

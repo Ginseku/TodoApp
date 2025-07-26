@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">TodoApp</string>
+    <string name="option_button">Options Button</string>
+    <string name="see_less">See less</string>
+    <string name="see_more">See more</string>
+    <string name="completion_of_daily_tasks">Completion Of Daily Tasks</string>
+    <string name="expand">Expand</string>
+    <string name="no_tasks_for_this_date">No tasks for this date</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="registration">Registration</string>
+    <string name="login">Login</string>
+    <string name="not_register_click_here_and_register">Not register? Click here and register!</string>
+    <string name="alredy_have_account_click_here_and_login">Alredy have account? Click here and login!</string>
 </resources>

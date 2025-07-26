@@ -1,4 +1,4 @@
-package com.example.todoapp.components
+package com.example.todoapp.navigation
 
 class BottomNavigationComponents {
 }

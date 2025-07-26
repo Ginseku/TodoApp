@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -130,7 +131,7 @@ fun Calendar() {
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.open_calendar),
-                                    contentDescription = "Expand",
+                                    contentDescription = stringResource(id = R.string.expand),
 //                                    modifier = Modifier.rotate(if (titleExpanded) 180f else 0f)
                                 )
                             }
@@ -191,7 +192,7 @@ fun Calendar() {
             val tasks = tasksByDate[date] ?: emptyList()
 
             if (tasks.isEmpty()) {
-                Text("No tasks for this date", modifier = Modifier.padding(16.dp))
+                Text(stringResource(id = R.string.no_tasks_for_this_date), modifier = Modifier.padding(16.dp))
             } else {
                 val displayedItems = if (listExpanded) tasks else tasks.take(3)
                 Column {
@@ -213,7 +214,7 @@ fun Calendar() {
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.options_button),
-                                    contentDescription = "Options button",
+                                    contentDescription = stringResource(id = R.string.option_button),
                                     modifier = Modifier.padding(end = 15.dp), // Небольшой отступ после иконки
                                     tint = Color.White
                                 )
@@ -242,7 +243,7 @@ fun Calendar() {
                             ) {
 
                                 Text(
-                                    text = if (listExpanded) "See less" else "See more",
+                                    text = if (listExpanded) stringResource(id = R.string.see_less) else stringResource(id = R.string.see_more),
                                     color = Color.White,
                                     modifier = Modifier.weight(1f)
                                 )

@@ -1,6 +1,5 @@
-package com.example.todoapp.components
+package com.example.todoapp.navigation
 
-import androidx.compose.material.icons.Icons
 import com.example.todoapp.R
 
 object Constants {
@@ -28,13 +27,6 @@ object Constants {
             label = "Mine",
             icon = R.drawable.mine_side,
             route = "Mine"
-        ),
-        // Registration screen
-        BottomNavigationItems(
-            label = "Registration",
-            icon = R.drawable.baseline_app_registration_24,
-            route = "Registration"
-
         )
     )
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todoapp.R
@@ -106,7 +107,7 @@ fun ExpandableTaskList(title: String, tasks: List<String>) {
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.options_button),
-                                    contentDescription = "Options button",
+                                    contentDescription = stringResource(id = R.string.option_button),
                                     modifier = Modifier.padding(end = 15.dp), // Небольшой отступ после иконки
                                     tint = Color.White
                                 )
@@ -136,7 +137,7 @@ fun ExpandableTaskList(title: String, tasks: List<String>) {
                             elevation = ButtonDefaults.buttonElevation(0.dp) // Убираем тень
                         ) {
 
-                            Text(text = if (listExpanded) "See less" else "See more", color = Color.White,
+                            Text(text = if (listExpanded) stringResource(id = R.string.see_less) else stringResource(id = R.string.see_more), color = Color.White,
                                 modifier = Modifier.weight(1f))
                             Icon(
                                 painter = painterResource(id = R.drawable.open_more_menu),

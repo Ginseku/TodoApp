@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +40,7 @@ import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.todoapp.R
 import com.example.todoapp.components.Header
 import com.example.todoapp.utilits.formatToSinglePrecision
 
@@ -83,7 +85,8 @@ fun Charts() {
         ) {
             Text(modifier = Modifier
                 .padding(start = 17.dp),
-                text = "Completion Of Daily Tasks")
+                text = stringResource(id = R.string.completion_of_daily_tasks)
+            )
         }
 
         val xAxisData = AxisData.Builder()

@@ -1,4 +1,4 @@
-package com.example.todoapp.components
+package com.example.todoapp.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -22,14 +22,15 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.todoapp.screens.calendar.Calendar
 import com.example.todoapp.screens.menuApp.MenuMainScreen
 import com.example.todoapp.screens.profile.ProfileMainScreen
-import com.example.todoapp.screens.registration.RegistrationScreen
 import com.example.todoapp.screens.tasks.TasksMainScreen
 
 @Composable
 fun NavHostConteiner (
     navController: NavHostController,
     padding : PaddingValues
-){
+)
+{
+
     NavHost(
         navController = navController,
         startDestination = "Tasks",
@@ -51,10 +52,6 @@ fun NavHostConteiner (
             // route : menu
             composable("Menu") {
                 MenuMainScreen()
-            }
-            composable("Registration") {
-                RegistrationScreen()
-
             }
         }
     )

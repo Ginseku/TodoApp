@@ -27,11 +27,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.todoapp.screens.Autentification.AuthResponse
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskDialog(onDismiss: () -> Unit) {
     var taskName by remember { mutableStateOf("") }
     var text by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
+
+    val dateDialogState = rememberMaterialDialogState()
+    val timeDialogState = rememberMaterialDialogState()
+    
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -74,13 +89,25 @@ fun TaskDialog(onDismiss: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Button(onClick = { /* Show date picker */ }) {
-                        Text("Set Date")
+                    Button(onClick = {
+                        dateDialogState.show()
+                    }) {
+                        Text("Set Date & Time")
                     }
 
                     Button(onClick = { /* Show category picker */ }) {
                         Text("Category")
                     }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Показываем выбранную дату и время
+                if (selectedDate != null && selectedTime != null) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    val dateTime = LocalDateTime.of(selectedDate, selectedTime)
+                    val formatted = dateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm"))
+                    Text("Selected: $formatted", fontSize = 14.sp)
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -92,6 +119,32 @@ fun TaskDialog(onDismiss: () -> Unit) {
                     Text("Save")
                 }
             }
+        }
+    }
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton("OK") {
+                timeDialogState.show()
+            }
+            negativeButton("Cancel")
+        },
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        datepicker { date ->
+            selectedDate = date
+        }
+    }
+    MaterialDialog(
+        dialogState = timeDialogState,
+        buttons = {
+            positiveButton("OK")
+            negativeButton("Cancel")
+        },
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        timepicker { time ->
+            selectedTime = time
         }
     }
 }

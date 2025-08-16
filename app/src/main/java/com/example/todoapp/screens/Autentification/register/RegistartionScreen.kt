@@ -19,32 +19,22 @@ import com.example.todoapp.screens.Autentification.RegButton
 import com.example.todoapp.screens.Autentification.RegEmailTextFields
 import com.example.todoapp.screens.Autentification.RegPasswordTextFields
 import com.example.todoapp.screens.Autentification.RegUserNameTextFields
+import com.example.todoapp.screens.Autentification.RegistrationField
+import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
 
 
 @Composable
 fun RegistrationScreen(onRegisterSuccess: () -> Unit, onBack: () -> Unit){
-    val viewModel = viewModel<RegisterScreenViewModel>()
+
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        RegEmailTextFields(
-            state = viewModel.regState,
-            onEvent = viewModel::onEvent,
 
+        RegistrationField(
+            viewModel = AuthViewModel(),
+            onRegisterSuccess = { onRegisterSuccess()}
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        RegUserNameTextFields(
-            state =  viewModel.regState,
-            onEvent = viewModel::onEvent
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        RegPasswordTextFields(
-            state =  viewModel.regState,
-            onEvent = viewModel::onEvent
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        RegButton(onRegisterSuccess = {Unit},Alignment.BottomCenter)
         Spacer(modifier = Modifier.height(5.dp))
         HaveAccountGoLoginButton ( onBack = {onBack()})
     }

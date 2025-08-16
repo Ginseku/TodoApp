@@ -1,5 +1,7 @@
 package com.example.todoapp.screens.Autentification
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -9,8 +11,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -20,6 +28,7 @@ import com.example.todoapp.screens.Autentification.login.LoginScreenEvent
 import com.example.todoapp.screens.Autentification.login.LoginScreenState
 import com.example.todoapp.screens.Autentification.register.RegisterScreenEvent
 import com.example.todoapp.screens.Autentification.register.RegisterScreenState
+import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
 
 @Composable
 fun RegEmailTextFields(
@@ -28,7 +37,7 @@ fun RegEmailTextFields(
 ) {
     TextField(
         value = state.email,
-        onValueChange = {onEvent(RegisterScreenEvent.OnEmailChange(it))},
+        onValueChange = { onEvent(RegisterScreenEvent.OnEmailChange(it)) },
         label = { Text(text = stringResource(id = R.string.email)) },
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +54,7 @@ fun RegPasswordTextFields(
 ) {
     TextField(
         value = state.password,
-        onValueChange = {onEvent(RegisterScreenEvent.OnPasswordChange(it))},
+        onValueChange = { onEvent(RegisterScreenEvent.OnPasswordChange(it)) },
         label = { Text(text = stringResource(id = R.string.password)) },
         visualTransformation = PasswordVisualTransformation(),
         modifier = Modifier
@@ -58,12 +67,14 @@ fun RegPasswordTextFields(
 fun RegUserNameTextFields(
     state: RegisterScreenState,
     onEvent: (RegisterScreenEvent) -> Unit
-){
+) {
     TextField(
         value = state.userName,
-        onValueChange = {onEvent(RegisterScreenEvent.OnUserNameChange(it))},
+        onValueChange = { onEvent(RegisterScreenEvent.OnUserNameChange(it)) },
         label = { Text(text = stringResource(id = R.string.username)) },
-        modifier = Modifier.fillMaxWidth().padding(6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
     )
 }
 
@@ -71,12 +82,14 @@ fun RegUserNameTextFields(
 fun LogUserNameTextFields(
     state: LoginScreenState,
     onEvent: (LoginScreenEvent) -> Unit
-){
+) {
     TextField(
         value = state.userName,
-        onValueChange = {onEvent(LoginScreenEvent.OnUserNameChange(it))},
+        onValueChange = { onEvent(LoginScreenEvent.OnUserNameChange(it)) },
         label = { Text(text = stringResource(id = R.string.username)) },
-        modifier = Modifier.fillMaxWidth().padding(6.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(6.dp)
     )
 }
 
@@ -87,7 +100,7 @@ fun LogPasswordTextFields(
 ) {
     TextField(
         value = state.password,
-        onValueChange = {onEvent(LoginScreenEvent.OnPasswordChange(it))},
+        onValueChange = { onEvent(LoginScreenEvent.OnPasswordChange(it)) },
         label = { Text(text = stringResource(id = R.string.password)) },
         visualTransformation = PasswordVisualTransformation(),
         modifier = Modifier
@@ -111,49 +124,131 @@ fun RegButton(onRegisterSuccess: () -> Unit, bottomCenter: Alignment) {
         Text(text = stringResource(id = R.string.registration))
     }
 }
+
 @Composable
-fun LogButton(onLoginSuccess: () -> Unit,bottomCenter: Alignment) {
-    Button(
-        modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp)
-            .fillMaxWidth()
-            .height(50.dp),
-        onClick = {onLoginSuccess()},
-        shape = RoundedCornerShape(5.dp),
-    ) {
-        Text(text = stringResource(id = R.string.login))
+fun LoginFields(viewModel: AuthViewModel, onLoginSuccess: () -> Unit) {
+    val context = LocalContext.current
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column {
+        TextField(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
+            value = username, onValueChange = { username = it },
+            label = { Text("Email") }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            modifier = Modifier
+                .padding(start = 15.dp, end = 15.dp)
+                .fillMaxWidth()
+                .height(50.dp),
+            onClick = {
+                viewModel.login(username, password) {
+                    onLoginSuccess()
+                }
+            },
+            shape = RoundedCornerShape(5.dp)
+        ) {
+            Text("Login")
+        }
+
+        if (viewModel.errorMessage != null) {
+            Text(text = viewModel.errorMessage!!, color = Color.Red)
+        }
     }
 }
 
 @Composable
-fun NotRegisterGoRegisterButton(onNavigateToRegister: () -> Unit){
+fun RegistrationField(viewModel: AuthViewModel, onRegisterSuccess: () -> Unit){
+    val context = LocalContext.current
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column {
+
+        TextField(
+            modifier = Modifier.fillMaxWidth()
+            .padding(start = 15.dp, end = 15.dp),
+            value = email,
+            onValueChange = {email = it},
+            label = {Text("Email")},)
+        Spacer(modifier = Modifier.padding(8.dp))
+        TextField(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
+            value = username,
+            onValueChange = {username = it},
+            label = {Text("Username")},)
+        Spacer(modifier = Modifier.padding(8.dp))
+        TextField(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
+            value = password,
+            onValueChange = {password = it},
+            label = {Text("Password")},)
+        Spacer(modifier = Modifier.padding(8.dp))
+        Button(
+            modifier = Modifier
+                .padding(start = 15.dp, end = 15.dp)
+                .fillMaxWidth()
+                .height(50.dp),
+            onClick = {
+                viewModel.register(username, email, password) {
+                    onRegisterSuccess()
+                }
+            },
+            shape = RoundedCornerShape(5.dp)
+        ) {
+            Text("Registration")
+        }
+    }
+}
+
+@Composable
+fun NotRegisterGoRegisterButton(onNavigateToRegister: () -> Unit) {
     TextButton(
         modifier = Modifier
             .padding(start = 15.dp, end = 15.dp)
             .height(45.dp),
         shape = RoundedCornerShape(5.dp),
         onClick = { onNavigateToRegister() },
-    ){
-        Text(text = stringResource(id = R.string.not_register_click_here_and_register),
+    ) {
+        Text(
+            text = stringResource(id = R.string.not_register_click_here_and_register),
             fontSize = 10.sp,
             color = androidx.compose.ui.graphics.Color.White,
             modifier = Modifier
-                .padding(top = 15.dp,)
-                )
+                .padding(top = 15.dp)
+        )
     }
 }
 
+
+
 @Composable
-fun HaveAccountGoLoginButton(onBack: () -> Unit){
+fun HaveAccountGoLoginButton(onBack: () -> Unit) {
     TextButton(
         modifier = Modifier
             .padding(start = 15.dp, end = 15.dp)
             .height(45.dp),
         shape = RoundedCornerShape(5.dp),
         onClick = { onBack() },
-    ){
-        Text(text = stringResource(id = R.string.alredy_have_account_click_here_and_login),
+    ) {
+        Text(
+            text = stringResource(id = R.string.alredy_have_account_click_here_and_login),
             fontSize = 10.sp,
-            color = androidx.compose.ui.graphics.Color.White)
+            color = androidx.compose.ui.graphics.Color.White
+        )
     }
 }

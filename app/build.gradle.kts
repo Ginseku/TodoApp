@@ -92,5 +92,9 @@ dependencies {
     //YCharts
     implementation ("co.yml:ycharts:2.1.0")
 
+    //data and time picker
+    implementation ("io.github.vanpra.compose-material-dialogs:datetime:0.9.0")
 
+    //Gson
+    implementation("com.google.code.gson:gson:2.10.1")
 }

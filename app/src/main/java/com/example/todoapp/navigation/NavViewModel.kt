@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
-class AuthViewModel(applicationContext: Context) : ViewModel() {
+class NavViewModel(applicationContext: Context) : ViewModel() {
     var isUserLoged by mutableStateOf(false)
         private set
 

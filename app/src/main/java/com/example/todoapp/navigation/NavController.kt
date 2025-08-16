@@ -10,19 +10,19 @@ import com.example.todoapp.screens.Autentification.login.LoginScreen
 import com.example.todoapp.screens.Autentification.register.RegistrationScreen
 
 @Composable
-fun NavController(authViewModel: AuthViewModel) {
+fun NavController(navViewModel: NavViewModel) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = if (authViewModel.isUserLoged) "main" else "auth"
+        startDestination = if (navViewModel.isUserLoged) "main" else "auth"
     )
     { //auth
         navigation(startDestination = "login", route = "auth"){
             composable("login"){
                 LoginScreen(
                     onLoginSuccess = {
-                        authViewModel.login()
+                        navViewModel.login()
                         navController.navigate("main") {
                             popUpTo("auth") {
                                 inclusive = true
@@ -30,7 +30,7 @@ fun NavController(authViewModel: AuthViewModel) {
                         }
                     },
                     onNavigateToRegister = {
-                        navController.navigate("auth/register")
+                        navController.navigate("register")
 
                     }
                 )
@@ -38,23 +38,22 @@ fun NavController(authViewModel: AuthViewModel) {
             composable("register"){
                 RegistrationScreen(
                     onRegisterSuccess = {
-                        authViewModel.login()
-                        navController.navigate("main") {
-                            popUpTo("auth") {
+                        navViewModel.login()
+                        navController.navigate("login") {
+                            popUpTo("register") {
                                 inclusive = true
                             }
                         }
                     },
                     onBack= {
-                        navController.navigate("auth/login")
+                        navController.navigate("login")
 
                     }
                 )
             }
-            composable("main") {
-                MainScreen() // тут будет NavHostContainer + BottomNavigationBar
-            }
-
+        }
+        composable("main") {
+            MainScreen() // тут будет NavHostContainer + BottomNavigationBar
         }
     }
 }

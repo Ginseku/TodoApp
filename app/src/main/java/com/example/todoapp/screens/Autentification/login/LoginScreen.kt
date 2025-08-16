@@ -26,7 +26,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
             verticalArrangement = Arrangement.Center
     ) {
         LoginFields(
-            viewModel = AuthViewModel(),
+            viewModel = viewModel<AuthViewModel>(),
             onLoginSuccess = { onLoginSuccess() }
         )
 

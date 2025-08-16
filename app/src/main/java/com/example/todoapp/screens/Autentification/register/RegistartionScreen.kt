@@ -32,7 +32,7 @@ fun RegistrationScreen(onRegisterSuccess: () -> Unit, onBack: () -> Unit){
     ) {
 
         RegistrationField(
-            viewModel = AuthViewModel(),
+            viewModel = viewModel<AuthViewModel>(),
             onRegisterSuccess = { onRegisterSuccess()}
         )
         Spacer(modifier = Modifier.height(5.dp))

@@ -1,8 +1,10 @@
 package com.example.todoapp.screens.Autentification.viewModels
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.screens.Autentification.LoginRequest
@@ -11,7 +13,9 @@ import com.example.todoapp.screens.Autentification.TokenManager
 import com.example.todoapp.screens.Autentification.network.RetrofitInstance
 import kotlinx.coroutines.launch
 
-class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
+    private val tokenManager = TokenManager(application)
+
     var isLoading by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
     var token by mutableStateOf<String?>(tokenManager.getToken())

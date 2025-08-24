@@ -1,6 +1,7 @@
 package com.example.todoapp.components
 
 import TaskDialog
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -21,27 +20,49 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.todoapp.API.TaskApi
+import com.example.todoapp.DAO.CategoryDao
 import com.example.todoapp.R
+import com.example.todoapp.screens.Autentification.TokenManager
+import com.example.todoapp.screens.tasks.TasksViewModel
+import com.example.todoapp.screens.tasks.dialog.CategoryViewModel
+import com.example.todoapp.screens.tasks.dialog.ViewModelFactory
 
 @Composable
-fun CreateTaskButton(modifier: Modifier = Modifier) {
+fun CreateTaskButton(
+    modifier: Modifier = Modifier,
+    dao: CategoryDao,
+    context: Context = LocalContext.current,
+    taskApi: TaskApi
+) {
+    val tokenManager = remember { TokenManager(context) }
+    val userToken = tokenManager.getToken() ?: ""
+
     var showDialog by remember { mutableStateOf(false) }
 
-    Box() {
+    val factory = remember {
+        ViewModelFactory(dao, context, userToken, taskApi)
+    }
+
+    val categoryViewModel: CategoryViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
+
+    val tasksViewModel: TasksViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
+
+    Box {
         Button(
-            onClick = {
-                showDialog = true
-            },
+            onClick = { showDialog = true },
             shape = RoundedCornerShape(15.dp),
             modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 5.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
                 .height(60.dp)
-        )
-        {
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.add_button),
                 contentDescription = "Add Button",
@@ -50,13 +71,15 @@ fun CreateTaskButton(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.width(15.dp))
             Text(text = "Create New Task", fontSize = 16.sp, color = Color.White)
-
         }
+
         if (showDialog) {
-            TaskDialog(onDismiss = { showDialog = false })
+            TaskDialog(
+                onDismiss = { showDialog = false },
+                tasksViewModel = tasksViewModel,
+                categoryViewModel = categoryViewModel
+            )
             println("Dialog opened")
         }
-
     }
-
 }

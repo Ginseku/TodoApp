@@ -20,17 +20,21 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     var errorMessage by mutableStateOf<String?>(null)
     var token by mutableStateOf<String?>(tokenManager.getToken())
         private set
-
+    var context = application.applicationContext
     fun login(username: String, password: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             isLoading = true
             try {
                 val response = RetrofitInstance.api.login(LoginRequest(username, password))
                 if (response.isSuccessful) {
-                    token = response.body()?.token
-                    token?.let { tokenManager.saveToken(it) }
-                    onSuccess()
-                } else {
+                    val tokenValue = response.body()?.token
+                    if (tokenValue != null) {
+                        token = tokenValue
+                        TokenManager(context).saveToken(tokenValue)
+                        onSuccess()
+                    }
+                }
+                else {
                     errorMessage = "Email or password incorrect: ${response.code()}"
                 }
             } catch (e: Exception) {

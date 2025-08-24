@@ -1,5 +1,6 @@
 package com.example.todoapp.screens.Autentification.network
 
+import com.example.todoapp.API.TaskApi
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -19,4 +20,5 @@ object RetrofitInstance {
         .build()
 
     val api: AuthApi = retrofit.create(AuthApi::class.java)
+    val taskApi: TaskApi = retrofit.create(TaskApi::class.java)
 }

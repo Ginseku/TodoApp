@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -42,12 +43,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.todoapp.API.TaskApi
+import com.example.todoapp.DAO.AppDatabase
 import com.example.todoapp.R
 import com.example.todoapp.components.CreateTaskButton
+import com.example.todoapp.screens.Autentification.TokenManager
+import com.example.todoapp.screens.Autentification.network.RetrofitInstance
+import com.example.todoapp.screens.tasks.dialog.ViewModelFactory
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -76,13 +85,27 @@ val tasksByDate = mapOf(
 )
 
 @Composable
-fun Calendar() {
+fun Calendar(
+) {
     val currentMonth = remember { YearMonth.now() }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var listExpanded by remember { mutableStateOf(false) }
     val startMonth = currentMonth.minusYears(30)
     val endMonth = currentMonth.plusYears(30)
+    val context = LocalContext.current
+    val tokenManager = remember { TokenManager(context) }
+    val userToken = tokenManager.getToken() ?: ""
 
+
+    val dao = remember { AppDatabase.getInstance(context).categoryDao() }
+    val calendarViewModel: CalendarViewModel = viewModel(
+        factory = ViewModelFactory(
+            dao = dao,
+            context = context,
+            userToken = userToken,
+            taskApi = RetrofitInstance.taskApi
+        )
+    )
 
     val state = rememberCalendarState(
         startMonth = startMonth,
@@ -262,7 +285,7 @@ fun Calendar() {
 
             }
         }
-        CreateTaskButton()
+        CreateTaskButton(dao = dao, context = context, taskApi = RetrofitInstance.taskApi)
     }
 }
 

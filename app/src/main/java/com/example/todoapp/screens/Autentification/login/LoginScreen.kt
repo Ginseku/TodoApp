@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.todoapp.screens.Autentification.LogPasswordTextFields
 import com.example.todoapp.screens.Autentification.LogUserNameTextFields
 import com.example.todoapp.screens.Autentification.LoginFields
@@ -19,7 +20,7 @@ import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
 
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
+fun LoginScreen(onLoginSuccess: () -> Unit ,navController: NavController, onNavigateToRegister: () -> Unit) {
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -27,7 +28,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit, onNavigateToRegister: () -> Unit) {
     ) {
         LoginFields(
             viewModel = viewModel<AuthViewModel>(),
-            onLoginSuccess = { onLoginSuccess() }
+            navController = navController,
+            onLoginSuccess = onLoginSuccess
         )
 
         Spacer(modifier = Modifier.height(1.dp))

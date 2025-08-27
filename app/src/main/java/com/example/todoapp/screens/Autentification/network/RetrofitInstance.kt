@@ -14,7 +14,7 @@ object RetrofitInstance {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.0.2.2:8080") // эмулятор Android, меняй на свой IP
+        .baseUrl("http://10.0.2.2:8080/") // эмулятор Android, меняй на свой IP
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()

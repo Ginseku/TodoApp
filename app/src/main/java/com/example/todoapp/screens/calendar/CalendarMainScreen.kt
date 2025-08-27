@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,11 +51,13 @@ import com.example.todoapp.R
 import com.example.todoapp.components.CreateTaskButton
 import com.example.todoapp.screens.Autentification.TokenManager
 import com.example.todoapp.screens.Autentification.network.RetrofitInstance
+import com.example.todoapp.screens.tasks.TasksViewModel
 import com.example.todoapp.screens.tasks.dialog.ViewModelFactory
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import kotlinx.coroutines.flow.filter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
@@ -85,8 +88,7 @@ val tasksByDate = mapOf(
 )
 
 @Composable
-fun Calendar(
-) {
+fun Calendar() {
     val currentMonth = remember { YearMonth.now() }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var listExpanded by remember { mutableStateOf(false) }
@@ -96,37 +98,25 @@ fun Calendar(
     val tokenManager = remember { TokenManager(context) }
     val userToken = tokenManager.getToken() ?: ""
 
-
-    val dao = remember { AppDatabase.getInstance(context).categoryDao() }
-    val calendarViewModel: CalendarViewModel = viewModel(
-        factory = ViewModelFactory(
-            dao = dao,
-            context = context,
-            userToken = userToken,
-            taskApi = RetrofitInstance.taskApi
-        )
-    )
+    val taskDao = remember { AppDatabase.getInstance(context).taskDao() }
+    val categoryDao = remember { AppDatabase.getInstance(context).categoryDao() }
 
     val state = rememberCalendarState(
         startMonth = startMonth,
         endMonth = endMonth,
         firstDayOfWeek = DayOfWeek.MONDAY,
-        firstVisibleMonth = currentMonth // using this for not return back after see new month
+        firstVisibleMonth = currentMonth
     )
-
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-
         HorizontalCalendar(
             state = state,
-
-
             monthHeader = { calendarMonth ->
-                val month = calendarMonth.yearMonth // Получаем YearMonth
+                val month = calendarMonth.yearMonth
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -138,33 +128,29 @@ fun Calendar(
                                 .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
                                 .height(110.dp)
                                 .background(MaterialTheme.colorScheme.surface),
-                            Arrangement.Start,
-                            Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Button(modifier = Modifier
-                                .padding(start = 16.dp)
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(8.dp)
+                            Button(
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                                    .border(
+                                        1.dp,
+                                        MaterialTheme.colorScheme.primary,
+                                        shape = RoundedCornerShape(8.dp)
+                                    ),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.surface
                                 ),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
-
-                                onClick = { }
+                                onClick = { /* TODO */ }
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.open_calendar),
-                                    contentDescription = stringResource(id = R.string.expand),
-//                                    modifier = Modifier.rotate(if (titleExpanded) 180f else 0f)
+                                    contentDescription = stringResource(id = R.string.expand)
                                 )
                             }
                             Text(
-                                text = month.format(
-                                    DateTimeFormatter.ofPattern(
-                                        "MMMM yyyy",
-                                        Locale.getDefault()
-                                    )
-                                ),
+                                text = month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -175,10 +161,7 @@ fun Calendar(
 
                     DaysOfWeekTitle(daysOfWeek = daysOfWeek())
                 }
-
             },
-
-
             dayContent = { day ->
                 val isSelected = selectedDate == day.date
                 Box(
@@ -189,7 +172,8 @@ fun Calendar(
                             if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .clickable { selectedDate = day.date }, contentAlignment = Alignment.Center
+                        .clickable { selectedDate = day.date },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = day.date.dayOfMonth.toString(),
@@ -198,10 +182,8 @@ fun Calendar(
                         color = if (day.position == DayPosition.MonthDate) Color.White else Color.Gray
                     )
                 }
-            },
-
-            )
-
+            }
+        )
 
         selectedDate?.let { date ->
             Text(
@@ -211,7 +193,6 @@ fun Calendar(
                 fontWeight = FontWeight.Bold
             )
 
-            // Проверяем, есть ли задачи для этой даты
             val tasks = tasksByDate[date] ?: emptyList()
 
             if (tasks.isEmpty()) {
@@ -225,7 +206,7 @@ fun Calendar(
                                 .fillMaxWidth()
                                 .height(45.dp)
                                 .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                                .clickable { /* Обработчик клика */ },
+                                .clickable { /* TODO: click handler */ },
                             shape = RoundedCornerShape(10.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
@@ -233,20 +214,22 @@ fun Calendar(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(start = 10.dp, top = 8.dp, end = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically // Выравнивание по центру по вертикали
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.options_button),
                                     contentDescription = stringResource(id = R.string.option_button),
-                                    modifier = Modifier.padding(end = 15.dp), // Небольшой отступ после иконки
+                                    modifier = Modifier.padding(end = 15.dp),
                                     tint = Color.White
                                 )
                                 Text(
-                                    text = task, fontSize = 16.sp
+                                    text = task,
+                                    fontSize = 16.sp
                                 )
                             }
                         }
                     }
+
                     if (tasks.size > 3) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -254,38 +237,41 @@ fun Calendar(
                         ) {
                             Button(
                                 modifier = Modifier.width(130.dp),
-                                onClick = {
-                                    listExpanded = !listExpanded
-                                },
+                                onClick = { listExpanded = !listExpanded },
                                 shape = RoundedCornerShape(10.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Transparent, // Прозрачный фон кнопки
-                                    contentColor = Color.White // Цвет текста и иконки
+                                    containerColor = Color.Transparent,
+                                    contentColor = Color.White
                                 ),
-                                elevation = ButtonDefaults.buttonElevation(0.dp) // Убираем тень
+                                elevation = ButtonDefaults.buttonElevation(0.dp)
                             ) {
-
                                 Text(
-                                    text = if (listExpanded) stringResource(id = R.string.see_less) else stringResource(id = R.string.see_more),
+                                    text = if (listExpanded) stringResource(id = R.string.see_less)
+                                    else stringResource(id = R.string.see_more),
                                     color = Color.White,
                                     modifier = Modifier.weight(1f)
                                 )
                                 Icon(
                                     painter = painterResource(id = R.drawable.open_more_menu),
                                     contentDescription = "",
-                                    modifier = Modifier.rotate(
-                                        if (listExpanded) 180f else 0f
-                                    ),
+                                    modifier = Modifier.rotate(if (listExpanded) 180f else 0f),
                                     tint = Color.White
                                 )
                             }
                         }
                     }
                 }
-
             }
         }
-        CreateTaskButton(dao = dao, context = context, taskApi = RetrofitInstance.taskApi)
+
+        // Создание задачи — пока заглушка
+        CreateTaskButton(
+            categoryDao = categoryDao,
+            taskDao = taskDao,
+            context = context,
+            taskApi = RetrofitInstance.taskApi,
+            onTaskCreated = { /* TODO: пока ничего не делаем */ }
+        )
     }
 }
 
@@ -307,5 +293,3 @@ fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
         }
     }
 }
-
-

@@ -23,13 +23,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.todoapp.R
 import com.example.todoapp.screens.Autentification.login.LoginScreenEvent
 import com.example.todoapp.screens.Autentification.login.LoginScreenState
 import com.example.todoapp.screens.Autentification.register.RegisterScreenEvent
 import com.example.todoapp.screens.Autentification.register.RegisterScreenState
 import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
-
+import android.net.Uri
 @Composable
 fun RegEmailTextFields(
     state: RegisterScreenState,
@@ -126,21 +127,23 @@ fun RegButton(onRegisterSuccess: () -> Unit, bottomCenter: Alignment) {
 }
 
 @Composable
-fun LoginFields(viewModel: AuthViewModel, onLoginSuccess: () -> Unit) {
+fun LoginFields(viewModel: AuthViewModel, navController: NavController, onLoginSuccess: () -> Unit) {
     val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column {
         TextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             value = username, onValueChange = { username = it },
             label = { Text("Email") }
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             value = password,
             onValueChange = { password = it },
@@ -154,6 +157,12 @@ fun LoginFields(viewModel: AuthViewModel, onLoginSuccess: () -> Unit) {
                 .height(50.dp),
             onClick = {
                 viewModel.login(username, password) {
+                    val savedToken = TokenManager(context).getToken() ?: ""
+                    val encodedToken = Uri.encode(savedToken) // кодируем JWT
+
+                    navController.navigate("main") {
+                        popUpTo("auth") { inclusive = true }
+                    }
                     onLoginSuccess()
                 }
             },
@@ -169,7 +178,7 @@ fun LoginFields(viewModel: AuthViewModel, onLoginSuccess: () -> Unit) {
 }
 
 @Composable
-fun RegistrationField(viewModel: AuthViewModel, onRegisterSuccess: () -> Unit){
+fun RegistrationField(viewModel: AuthViewModel, onRegisterSuccess: () -> Unit) {
     val context = LocalContext.current
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -178,25 +187,31 @@ fun RegistrationField(viewModel: AuthViewModel, onRegisterSuccess: () -> Unit){
     Column {
 
         TextField(
-            modifier = Modifier.fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp),
             value = email,
-            onValueChange = {email = it},
-            label = {Text("Email")},)
+            onValueChange = { email = it },
+            label = { Text("Email") },
+        )
         Spacer(modifier = Modifier.padding(8.dp))
         TextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             value = username,
-            onValueChange = {username = it},
-            label = {Text("Username")},)
+            onValueChange = { username = it },
+            label = { Text("Username") },
+        )
         Spacer(modifier = Modifier.padding(8.dp))
         TextField(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 15.dp, end = 15.dp),
             value = password,
-            onValueChange = {password = it},
-            label = {Text("Password")},)
+            onValueChange = { password = it },
+            label = { Text("Password") },
+        )
         Spacer(modifier = Modifier.padding(8.dp))
         Button(
             modifier = Modifier
@@ -233,7 +248,6 @@ fun NotRegisterGoRegisterButton(onNavigateToRegister: () -> Unit) {
         )
     }
 }
-
 
 
 @Composable

@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.todoapp.API.TaskApi
 import com.example.todoapp.DAO.CategoryDao
+import com.example.todoapp.DAO.TaskDao
+import com.example.todoapp.DAO.TaskDto
 import com.example.todoapp.R
 import com.example.todoapp.screens.Autentification.TokenManager
 import com.example.todoapp.screens.tasks.TasksViewModel
@@ -35,9 +37,11 @@ import com.example.todoapp.screens.tasks.dialog.ViewModelFactory
 @Composable
 fun CreateTaskButton(
     modifier: Modifier = Modifier,
-    dao: CategoryDao,
+    categoryDao: CategoryDao,
+    taskDao: TaskDao,
     context: Context = LocalContext.current,
-    taskApi: TaskApi
+    taskApi: TaskApi,
+    onTaskCreated: (TaskDto) -> Unit
 ) {
     val tokenManager = remember { TokenManager(context) }
     val userToken = tokenManager.getToken() ?: ""
@@ -45,7 +49,11 @@ fun CreateTaskButton(
     var showDialog by remember { mutableStateOf(false) }
 
     val factory = remember {
-        ViewModelFactory(dao, context, userToken, taskApi)
+        ViewModelFactory(categoryDao = categoryDao,
+            taskDao = taskDao,
+            context = context,
+            userToken = userToken,
+            taskApi = taskApi)
     }
 
     val categoryViewModel: CategoryViewModel =

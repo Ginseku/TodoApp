@@ -5,10 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.todoapp.API.TaskApi
 import com.example.todoapp.DAO.CategoryDao
+import com.example.todoapp.DAO.TaskDao
+import com.example.todoapp.screens.calendar.CalendarViewModel
 import com.example.todoapp.screens.tasks.TasksViewModel
 
 class ViewModelFactory(
-    private val dao: CategoryDao,
+    private val categoryDao: CategoryDao,
+    private val taskDao: TaskDao,
     private val context: Context,
     private val userToken: String,
     private val taskApi: TaskApi
@@ -16,10 +19,13 @@ class ViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(CategoryViewModel::class.java) -> {
-                CategoryViewModel(dao, userToken) as T
+                CategoryViewModel(categoryDao, userToken) as T
             }
             modelClass.isAssignableFrom(TasksViewModel::class.java) -> {
-                TasksViewModel(taskApi, userToken) as T
+                TasksViewModel(taskApi, taskDao, userToken) as T
+            }
+            modelClass.isAssignableFrom(CalendarViewModel::class.java) -> {
+                CalendarViewModel() as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: $modelClass")
         }

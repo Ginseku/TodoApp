@@ -31,8 +31,8 @@ fun NavController(navViewModel: NavViewModel) {
                     },
                     onNavigateToRegister = {
                         navController.navigate("register")
-
-                    }
+                    },
+                    navController = navController
                 )
             }
             composable("register"){

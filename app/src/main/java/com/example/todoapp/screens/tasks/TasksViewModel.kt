@@ -6,23 +6,54 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.API.TaskApi
+import com.example.todoapp.DAO.TaskDao
 import com.example.todoapp.DAO.TaskDto
+import com.example.todoapp.DAO.TaskEntity
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class TasksViewModel(
     private val api: TaskApi,
+    private val dao: TaskDao,
     private val token: String
 ) : ViewModel() {
 
-    var tasks by mutableStateOf<List<TaskDto>>(emptyList())
-        private set
+    val tasks: StateFlow<List<TaskEntity>> = dao.getAllTasks(token)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    init {
+        refreshFromApi()
+    }
 
-    fun loadTasks() {
+    fun refreshFromApi() {
         viewModelScope.launch {
             try {
-                tasks = api.getAllTasks("Bearer $token")
+                val apiTasks = api.getAllTasks("Bearer $token")
+                val entities = apiTasks.map { it.toEntity(token) }
+
+                // очистка + вставка (или просто вставка с REPLACE)
+                dao.insertAll(entities)
             } catch (e: Exception) {
-                // Обработка ошибки
+                println("Ошибка синхронизации: ${e.message}")
+            }
+        }
+    }
+
+    fun syncTasks() {
+        viewModelScope.launch {
+            try {
+                val apiTasks = api.getAllTasks("Bearer $token")
+                // конвертируем TaskDto -> TaskEntity и вставляем в БД
+                apiTasks.forEach { dto ->
+                    dao.insertTask(dto.toEntity(token))
+                }
+            } catch (e: Exception) {
+                // обработка ошибки
             }
         }
     }
@@ -30,7 +61,9 @@ class TasksViewModel(
     fun createTask(task: TaskDto, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                api.createTask("Bearer $token", task)
+                val created = api.createTask("Bearer $token", task)
+                // сохраняем в БД
+                dao.insertTask(created.toEntity(token))
                 onSuccess()
             } catch (e: Exception) {
                 onError(e.message ?: "Ошибка создания задачи")
@@ -39,3 +72,16 @@ class TasksViewModel(
     }
 }
 
+// 🔹 Маппер TaskDto -> TaskEntity
+private fun TaskDto.toEntity(userToken: String): TaskEntity {
+    return TaskEntity(
+        title = this.title,
+        content = this.content,
+        category = this.category,
+        timeCategory = this.timeCategory,
+        taskCreatedTime = this.taskCreatedTime,
+        reminderTime = this.reminderTime,
+        dateTime = this.dateTime,
+        userToken = userToken
+    )
+}

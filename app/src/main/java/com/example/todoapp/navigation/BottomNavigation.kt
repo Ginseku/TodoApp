@@ -16,14 +16,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.todoapp.API.TaskApi
 import com.example.todoapp.screens.calendar.Calendar
 import com.example.todoapp.screens.menuApp.MenuMainScreen
 import com.example.todoapp.screens.profile.ProfileMainScreen
 import com.example.todoapp.screens.tasks.TasksMainScreen
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import com.example.todoapp.screens.Autentification.TokenManager
 
 @Composable
 fun NavHostConteiner (
@@ -38,8 +43,9 @@ fun NavHostConteiner (
         modifier = Modifier.padding(paddingValues = padding),
         builder = {
             // route : tasks
-            composable("Tasks") {
-                TasksMainScreen()
+            composable(route = "Tasks") { backStackEntry ->
+                val token = TokenManager(LocalContext.current).getToken() ?: ""
+                TasksMainScreen(savedToken = token)
             }
 
             // route : calendar

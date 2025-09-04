@@ -70,11 +70,27 @@ class TasksViewModel(
             }
         }
     }
+    fun deleteTask(taskId: Int, onError: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                // 1. Удаляем на сервере
+                api.deleteTask("Bearer $token", taskId)
+
+                // 2. Если успешно, удаляем локально
+                dao.deleteTask(taskId)
+
+            } catch (e: Exception) {
+                onError(e.message ?: "Ошибка при удалении")
+            }
+        }
+    }
 }
+
 
 // 🔹 Маппер TaskDto -> TaskEntity
 private fun TaskDto.toEntity(userToken: String): TaskEntity {
     return TaskEntity(
+        id = this.noteId ?:0,
         title = this.title,
         content = this.content,
         category = this.category,

@@ -78,7 +78,7 @@ fun TasksMainScreen(savedToken: String) {
                 taskDao = taskDao,
                 context = LocalContext.current,
                 userToken = savedToken,  // здесь твой JWT токен
-                taskApi = RetrofitInstance.taskApi
+                taskApi = RetrofitInstance.taskApi,
             )
 
         )
@@ -92,7 +92,6 @@ fun TasksMainScreen(savedToken: String) {
             context = context,
             taskApi = RetrofitInstance.taskApi,
             onTaskCreated = { newTaskDto ->
-                // ✅ сразу вызываем createTask у viewModel
                 viewModel.createTask(
                     task = newTaskDto,
                     onSuccess = { /* UI обновится автоматически через collectAsState */ },

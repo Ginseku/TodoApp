@@ -36,21 +36,21 @@ import com.example.todoapp.R
 
 
 @Composable
-fun TaskLists(tasks: List<TaskEntity>, modifier: Modifier = Modifier) {
+fun TaskLists(tasks: List<TaskEntity>, modifier: Modifier = Modifier,viewModel: TasksViewModel) {
     Column(modifier = modifier) {
 //        ExpandableTaskList("Previous Tasks", listOf("Task 1", "Task 2", "Task 3", "Task 4", "Task 5", "Task 6", "Task 7", "Task 8"))
 //        ExpandableTaskList("Current Tasks", listOf("Task A", "Task B", "Task C", "Task D", "Task E", ))
 //        ExpandableTaskList("Future Tasks", listOf("Task X", "Task Y", "Task Z", "Task W", "Task G","Task H", "Task J", "Task K", "Task L", "Task Q"))
 //        ExpandableTaskList("All Tasks", (1..10).map { "Task $it" })
         Column(modifier = modifier) {
-            ExpandableTaskList("All Tasks", tasks)
+            ExpandableTaskList("All Tasks", tasks, viewModel)
         }
     }
 }
 //Open tasks lists
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun ExpandableTaskList(title: String, tasks: List<TaskEntity>) {
+fun ExpandableTaskList(title: String, tasks: List<TaskEntity>,viewModel: TasksViewModel) {
     var titleExpanded by remember { mutableStateOf(false) }
     var listExpanded by remember { mutableStateOf(false) }
 
@@ -93,7 +93,8 @@ fun ExpandableTaskList(title: String, tasks: List<TaskEntity>) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 10.dp, top = 8.dp, end = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.options_button),
@@ -114,7 +115,19 @@ fun ExpandableTaskList(title: String, tasks: List<TaskEntity>) {
                                     )
                                 }
                             }
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_delete_24),
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier
+                                    .clickable {
+                                        viewModel.deleteTask(task.id) { error ->
+                                            println("Ошибка удаления: $error")
+                                        }
+                                    }
+                            )
                         }
+
                     }
                 }
             }

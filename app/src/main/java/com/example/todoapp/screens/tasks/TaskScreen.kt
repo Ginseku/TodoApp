@@ -18,6 +18,7 @@ fun TaskScreen(factory: ViewModelFactory) {
 
     TaskLists(
         tasks = tasks, // здесь tasks уже List<TaskEntity>
-        modifier = Modifier.padding(top = 16.dp)
+        modifier = Modifier.padding(top = 16.dp),
+        viewModel = viewModel
     )
 }

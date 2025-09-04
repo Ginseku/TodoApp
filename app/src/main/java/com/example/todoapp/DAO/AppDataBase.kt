@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CategoryEntity::class, TaskEntity::class],
-    version = 2,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,19 +28,20 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database" // название файла базы
-                ).addMigrations(MIGRATION_1_2).build()
+                ).addMigrations(MIGRATION_4_5)
+                    .build()
                 INSTANCE = instance
                 instance
             }
         }
     }
 }
-val MIGRATION_1_2 = object : Migration(1, 2) {
+val MIGRATION_4_5 = object : Migration(4, 5) {
     override fun migrate(database: SupportSQLiteDatabase) {
         // Создаём новую таблицу tasks
         database.execSQL("""
             CREATE TABLE IF NOT EXISTS tasks (
-                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                id INTEGER PRIMARY KEY,
                 title TEXT NOT NULL,
                 content TEXT NOT NULL,
                 category TEXT,
@@ -51,5 +52,6 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 userToken TEXT NOT NULL
             )
         """.trimIndent())
+
     }
 }

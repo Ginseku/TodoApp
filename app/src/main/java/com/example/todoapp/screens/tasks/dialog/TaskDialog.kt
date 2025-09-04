@@ -107,6 +107,7 @@ fun TaskDialog(
                             } else null
 
                             val task = TaskDto(
+                                noteId = null,
                                 title = text,
                                 content = content,
                                 category = selectedCategory,

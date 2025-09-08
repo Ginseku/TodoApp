@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.todoapp.screens.Autentification.LogPasswordTextFields
-import com.example.todoapp.screens.Autentification.LogUserNameTextFields
 import com.example.todoapp.screens.Autentification.LoginFields
 import com.example.todoapp.screens.Autentification.NotRegisterGoRegisterButton
 import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel

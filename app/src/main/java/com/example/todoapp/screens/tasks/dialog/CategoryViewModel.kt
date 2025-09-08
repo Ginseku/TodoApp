@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 
 class CategoryViewModel(
     private val dao: CategoryDao,
-    private val userToken: String
+    private val userToken: String,
+    private val userId: String
 ) : ViewModel() {
 
     private val _categories = MutableStateFlow<List<CategoryEntity>>(emptyList())
@@ -23,16 +24,26 @@ class CategoryViewModel(
 
     fun loadCategories() {
         viewModelScope.launch {
-            _categories.value = dao.getCategoriesForUser(userToken)
+
+            val defaultCategories = dao.getCategoriesForUser("default")
+            val userCategories = dao.getCategoriesForUser(userId)
+            _categories.value = defaultCategories + userCategories
         }
     }
 
     fun addCategory(name: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
-            val newCategory = CategoryEntity(name = name, userToken = userToken)
+            val newCategory = CategoryEntity(name = name, userId = userId, userToken = userToken)
             dao.insertCategory(newCategory)
             loadCategories() // обновляем список
+        }
+    }
+
+    fun deleteCategory(category: CategoryEntity){
+        viewModelScope.launch {
+            dao.deleteCategoryById(category.id)
+            loadCategories()
         }
     }
 }

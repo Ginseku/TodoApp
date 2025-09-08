@@ -44,7 +44,9 @@ fun CreateTaskButton(
     onTaskCreated: (TaskDto) -> Unit
 ) {
     val tokenManager = remember { TokenManager(context) }
+    val userIdManager = remember { IdManager(context) }
     val userToken = tokenManager.getToken() ?: ""
+    val userID = userIdManager.getId() ?: ""
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -52,6 +54,7 @@ fun CreateTaskButton(
         ViewModelFactory(categoryDao = categoryDao,
             taskDao = taskDao,
             context = context,
+            userId = userID,
             userToken = userToken,
             taskApi = taskApi)
     }

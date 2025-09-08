@@ -31,100 +31,6 @@ import com.example.todoapp.screens.Autentification.register.RegisterScreenEvent
 import com.example.todoapp.screens.Autentification.register.RegisterScreenState
 import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
 import android.net.Uri
-@Composable
-fun RegEmailTextFields(
-    state: RegisterScreenState,
-    onEvent: (RegisterScreenEvent) -> Unit
-) {
-    TextField(
-        value = state.email,
-        onValueChange = { onEvent(RegisterScreenEvent.OnEmailChange(it)) },
-        label = { Text(text = stringResource(id = R.string.email)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-
-    )
-
-}
-
-@Composable
-fun RegPasswordTextFields(
-    state: RegisterScreenState,
-    onEvent: (RegisterScreenEvent) -> Unit
-) {
-    TextField(
-        value = state.password,
-        onValueChange = { onEvent(RegisterScreenEvent.OnPasswordChange(it)) },
-        label = { Text(text = stringResource(id = R.string.password)) },
-        visualTransformation = PasswordVisualTransformation(),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    )
-}
-
-@Composable
-fun RegUserNameTextFields(
-    state: RegisterScreenState,
-    onEvent: (RegisterScreenEvent) -> Unit
-) {
-    TextField(
-        value = state.userName,
-        onValueChange = { onEvent(RegisterScreenEvent.OnUserNameChange(it)) },
-        label = { Text(text = stringResource(id = R.string.username)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    )
-}
-
-@Composable
-fun LogUserNameTextFields(
-    state: LoginScreenState,
-    onEvent: (LoginScreenEvent) -> Unit
-) {
-    TextField(
-        value = state.userName,
-        onValueChange = { onEvent(LoginScreenEvent.OnUserNameChange(it)) },
-        label = { Text(text = stringResource(id = R.string.username)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    )
-}
-
-@Composable
-fun LogPasswordTextFields(
-    state: LoginScreenState,
-    onEvent: (LoginScreenEvent) -> Unit
-) {
-    TextField(
-        value = state.password,
-        onValueChange = { onEvent(LoginScreenEvent.OnPasswordChange(it)) },
-        label = { Text(text = stringResource(id = R.string.password)) },
-        visualTransformation = PasswordVisualTransformation(),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(6.dp)
-    )
-
-
-}
-
-@Composable
-fun RegButton(onRegisterSuccess: () -> Unit, bottomCenter: Alignment) {
-    Button(
-        modifier = Modifier
-            .padding(start = 15.dp, end = 15.dp)
-            .fillMaxWidth()
-            .height(50.dp),
-        onClick = { /*TODO*/ },
-        shape = RoundedCornerShape(5.dp),
-    ) {
-        Text(text = stringResource(id = R.string.registration))
-    }
-}
 
 @Composable
 fun LoginFields(viewModel: AuthViewModel, navController: NavController, onLoginSuccess: () -> Unit) {
@@ -147,6 +53,7 @@ fun LoginFields(viewModel: AuthViewModel, navController: NavController, onLoginS
                 .padding(start = 15.dp, end = 15.dp),
             value = password,
             onValueChange = { password = it },
+            visualTransformation = PasswordVisualTransformation(),
             label = { Text("Password") }
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -210,6 +117,7 @@ fun RegistrationField(viewModel: AuthViewModel, onRegisterSuccess: () -> Unit) {
                 .padding(start = 15.dp, end = 15.dp),
             value = password,
             onValueChange = { password = it },
+            visualTransformation = PasswordVisualTransformation(),
             label = { Text("Password") },
         )
         Spacer(modifier = Modifier.padding(8.dp))

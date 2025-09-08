@@ -14,12 +14,13 @@ class ViewModelFactory(
     private val taskDao: TaskDao,
     private val context: Context,
     private val userToken: String,
-    private val taskApi: TaskApi
+    private val taskApi: TaskApi,
+    private val userId: String
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(CategoryViewModel::class.java) -> {
-                CategoryViewModel(categoryDao, userToken) as T
+                CategoryViewModel(categoryDao,userToken, userId, ) as T
             }
             modelClass.isAssignableFrom(TasksViewModel::class.java) -> {
                 TasksViewModel(taskApi, taskDao, userToken) as T

@@ -65,6 +65,15 @@ fun CategoryDialog(
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(category.name, style = MaterialTheme.typography.bodyLarge)
+                                if (category.userToken != "default") {  // дефолтные категории нельзя удалять
+                                    IconButton(onClick = { categoryViewModel.deleteCategory(category) }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

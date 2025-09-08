@@ -42,6 +42,7 @@ import com.example.todoapp.DAO.TaskDto
 import com.example.todoapp.R
 import com.example.todoapp.components.CreateTaskButton
 import com.example.todoapp.components.Header
+import com.example.todoapp.components.getUserIdFromToken
 import com.example.todoapp.screens.Autentification.network.RetrofitInstance
 import com.example.todoapp.screens.tasks.dialog.ViewModelFactory
 
@@ -51,7 +52,7 @@ fun TasksMainScreen(savedToken: String) {
     val context = LocalContext.current
     val taskDao = remember { AppDatabase.getInstance(context).taskDao() }
     val categoryDao = remember { AppDatabase.getInstance(context).categoryDao() }
-
+    val userId = getUserIdFromToken(savedToken) ?: ""
     // Создаём ViewModel через фабрику
     val viewModel: TasksViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
         factory = ViewModelFactory(
@@ -59,7 +60,8 @@ fun TasksMainScreen(savedToken: String) {
             userToken = savedToken,
             taskApi = RetrofitInstance.taskApi,
             taskDao = taskDao,
-            categoryDao = categoryDao
+            categoryDao = categoryDao,
+            userId = userId
         )
     )
     val tasks by viewModel.tasks.collectAsState()
@@ -79,6 +81,7 @@ fun TasksMainScreen(savedToken: String) {
                 context = LocalContext.current,
                 userToken = savedToken,  // здесь твой JWT токен
                 taskApi = RetrofitInstance.taskApi,
+                userId = userId
             )
 
         )

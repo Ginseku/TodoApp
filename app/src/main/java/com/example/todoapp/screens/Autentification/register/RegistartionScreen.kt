@@ -15,10 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todoapp.screens.Autentification.HaveAccountGoLoginButton
-import com.example.todoapp.screens.Autentification.RegButton
-import com.example.todoapp.screens.Autentification.RegEmailTextFields
-import com.example.todoapp.screens.Autentification.RegPasswordTextFields
-import com.example.todoapp.screens.Autentification.RegUserNameTextFields
 import com.example.todoapp.screens.Autentification.RegistrationField
 import com.example.todoapp.screens.Autentification.viewModels.AuthViewModel
 

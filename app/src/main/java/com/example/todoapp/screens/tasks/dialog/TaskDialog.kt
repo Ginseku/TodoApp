@@ -48,14 +48,14 @@ fun TaskDialog(
             tonalElevation = 8.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("Создать задачу", fontSize = 20.sp)
+                Text("Create Task", fontSize = 20.sp)
 
                 Spacer(Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    label = { Text("Название задачи") },
+                    label = { Text("Task name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -65,7 +65,7 @@ fun TaskDialog(
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    label = { Text("Описание задачи") },
+                    label = { Text("Task description") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
@@ -78,7 +78,7 @@ fun TaskDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(onClick = { dateDialogState.show() }) {
-                        Text("Дата и время")
+                        Text("Date and Time")
                     }
                     Button(onClick = { showCategoryDialog = true }) {
                         Text(selectedCategory)
@@ -91,7 +91,7 @@ fun TaskDialog(
                     val dateTime = LocalDateTime.of(selectedDate, selectedTime)
                     val formatted =
                         dateTime.format(DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm"))
-                    Text("Выбрано: $formatted", fontSize = 14.sp)
+                    Text("Chosen date: $formatted", fontSize = 14.sp)
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -99,7 +99,7 @@ fun TaskDialog(
                 Button(
                     onClick = {
                         if (text.isBlank()) {
-                            Toast.makeText(context, "Введите название задачи", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Insert task name", Toast.LENGTH_SHORT).show()
                         } else {
                             val dateTime = if (selectedDate != null && selectedTime != null) {
                                 LocalDateTime.of(selectedDate, selectedTime)
@@ -121,7 +121,7 @@ fun TaskDialog(
                             tasksViewModel.createTask(
                                 task,
                                 onSuccess = {
-                                    Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Task saved", Toast.LENGTH_SHORT).show()
                                     onDismiss()
                                 },
                                 onError = { error ->
@@ -132,7 +132,7 @@ fun TaskDialog(
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Сохранить")
+                    Text("Save")
                 }
 
 

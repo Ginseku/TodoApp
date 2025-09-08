@@ -38,10 +38,6 @@ import com.example.todoapp.R
 @Composable
 fun TaskLists(tasks: List<TaskEntity>, modifier: Modifier = Modifier,viewModel: TasksViewModel) {
     Column(modifier = modifier) {
-//        ExpandableTaskList("Previous Tasks", listOf("Task 1", "Task 2", "Task 3", "Task 4", "Task 5", "Task 6", "Task 7", "Task 8"))
-//        ExpandableTaskList("Current Tasks", listOf("Task A", "Task B", "Task C", "Task D", "Task E", ))
-//        ExpandableTaskList("Future Tasks", listOf("Task X", "Task Y", "Task Z", "Task W", "Task G","Task H", "Task J", "Task K", "Task L", "Task Q"))
-//        ExpandableTaskList("All Tasks", (1..10).map { "Task $it" })
         Column(modifier = modifier) {
             ExpandableTaskList("All Tasks", tasks, viewModel)
         }
@@ -82,7 +78,6 @@ fun ExpandableTaskList(title: String, tasks: List<TaskEntity>,viewModel: TasksVi
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
                             .height(60.dp)
                             .padding(top = 8.dp)
                             .clickable { /* обработчик клика */ },

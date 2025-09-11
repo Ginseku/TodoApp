@@ -33,13 +33,34 @@ import androidx.compose.ui.unit.sp
 import com.example.todoapp.DAO.TaskDto
 import com.example.todoapp.DAO.TaskEntity
 import com.example.todoapp.R
+import com.example.todoapp.components.parseDate
+import java.time.LocalDate
 
 
 @Composable
-fun TaskLists(tasks: List<TaskEntity>, modifier: Modifier = Modifier,viewModel: TasksViewModel) {
+fun TaskLists(
+    tasks: List<TaskEntity>,
+    modifier: Modifier = Modifier,
+    viewModel: TasksViewModel
+) {
+    val today = LocalDate.now()
+
+    // Разделяем задачи по времени
+    val previousTasks = tasks.filter { parseDate(it.dateTime)?.isBefore(today) == true }
+    val todayTasks = tasks.filter { parseDate(it.dateTime)?.isEqual(today) == true }
+    val futureTasks = tasks.filter { parseDate(it.dateTime)?.isAfter(today) == true }
+
+    val categoryGroups = tasks.groupBy { it.category ?: "No category" }
     Column(modifier = modifier) {
         Column(modifier = modifier) {
             ExpandableTaskList("All Tasks", tasks, viewModel)
+
+            ExpandableTaskList("Previous", previousTasks, viewModel)
+            ExpandableTaskList("Today", todayTasks, viewModel)
+            ExpandableTaskList("Upcoming", futureTasks, viewModel)
+            ExpandableCategoryList("Categories", categoryGroups, viewModel)
+
+//            ExpandableTaskList("Completed Tasks", tasks, viewModel)
         }
     }
 }
@@ -155,6 +176,40 @@ fun ExpandableTaskList(title: String, tasks: List<TaskEntity>,viewModel: TasksVi
                         )
                     }
                 }
+            }
+        }
+    }
+}
+@Composable
+fun ExpandableCategoryList(
+    title: String,
+    categoryGroups: Map<String, List<TaskEntity>>,
+    viewModel: TasksViewModel
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 18.dp, top = 8.dp, end = 16.dp)
+    ) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { expanded = !expanded },
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Text(text = title, modifier = Modifier.weight(1f))
+            Icon(
+                painter = painterResource(id = R.drawable.open_more_menu),
+                contentDescription = "Expand",
+                modifier = Modifier.rotate(if (expanded) 180f else 0f)
+            )
+        }
+
+        if (expanded) {
+            categoryGroups.forEach { (category, tasksInCategory) ->
+                ExpandableTaskList("• $category", tasksInCategory, viewModel)
             }
         }
     }

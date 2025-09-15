@@ -1,5 +1,6 @@
 package com.example.todoapp.screens.tasks;
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,10 +10,15 @@ import com.example.todoapp.API.TaskApi
 import com.example.todoapp.DAO.TaskDao
 import com.example.todoapp.DAO.TaskDto
 import com.example.todoapp.DAO.TaskEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class TasksViewModel(
     private val api: TaskApi,
@@ -43,6 +49,23 @@ class TasksViewModel(
             }
         }
     }
+
+    fun getTasksForDate(date: LocalDate): Flow<List<TaskEntity>> {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        return dao.getAllTasks(token).map { allTasks ->
+            allTasks.filter { task ->
+                task.dateTime?.let {
+                    try {
+                        val taskDate = LocalDate.parse(it.substring(0, 10), formatter)
+                        taskDate == date
+                    } catch (e: Exception) {
+                        false
+                    }
+                } ?: false
+            }
+        }
+    }
+
 
     fun syncTasks() {
         viewModelScope.launch {

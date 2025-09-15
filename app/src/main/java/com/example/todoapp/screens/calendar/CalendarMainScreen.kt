@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +21,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +52,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.todoapp.API.TaskApi
 import com.example.todoapp.DAO.AppDatabase
+import com.example.todoapp.DAO.TaskEntity
 import com.example.todoapp.R
 import com.example.todoapp.components.CreateTaskButton
+import com.example.todoapp.components.getUserIdFromToken
 import com.example.todoapp.screens.Autentification.TokenManager
 import com.example.todoapp.screens.Autentification.network.RetrofitInstance
 import com.example.todoapp.screens.tasks.TasksViewModel
@@ -58,10 +65,12 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -70,30 +79,14 @@ import java.util.Locale
 val productSans = FontFamily(
     Font(R.font.product_sans_regular, FontWeight.Normal)
 )
-
-val tasksByDate = mapOf(
-    LocalDate.of(2025, 3, 22) to listOf("Task 1", "Task 2", "Task 3"),
-    LocalDate.of(2025, 3, 23) to listOf("Task A", "Task B", "Task C"),
-    LocalDate.of(2025, 3, 24) to listOf(
-        "Task X",
-        "Task Y",
-        "Task Z",
-        "Task S",
-        "Task D",
-        "Task F",
-        "Task H",
-        "Task J",
-        "Task K"
-    )
-)
-
 @Composable
 fun Calendar() {
     val currentMonth = remember { YearMonth.now() }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var listExpanded by remember { mutableStateOf(false) }
-    val startMonth = currentMonth.minusYears(30)
-    val endMonth = currentMonth.plusYears(30)
+    var showCalendarDialog by remember { mutableStateOf(false) }
+
+
     val context = LocalContext.current
     val tokenManager = remember { TokenManager(context) }
     val userToken = tokenManager.getToken() ?: ""
@@ -101,13 +94,34 @@ fun Calendar() {
     val taskDao = remember { AppDatabase.getInstance(context).taskDao() }
     val categoryDao = remember { AppDatabase.getInstance(context).categoryDao() }
 
+    val tasksViewModel: TasksViewModel = viewModel(
+        factory = ViewModelFactory(
+            categoryDao = categoryDao,
+            taskDao = taskDao,
+            context = context,
+            userToken = userToken,
+            taskApi = RetrofitInstance.taskApi,
+            userId = ""
+        )
+    )
+
     val state = rememberCalendarState(
-        startMonth = startMonth,
-        endMonth = endMonth,
+        startMonth = currentMonth.minusYears(30),
+        endMonth = currentMonth.plusYears(30),
         firstDayOfWeek = DayOfWeek.MONDAY,
         firstVisibleMonth = currentMonth
     )
+    val mainCoroutineScope = rememberCoroutineScope()
 
+    // ---------- СИНХРОНИЗАЦИЯ С ДИАЛОГОМ ----------
+    // При выборе даты в диалоге основной календарь автоматически прокручивается на эту дату
+    selectedDate?.let { date ->
+        LaunchedEffect(date) {
+            mainCoroutineScope.launch {
+                state.scrollToMonth(YearMonth.from(date))
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -121,7 +135,7 @@ fun Calendar() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(modifier = Modifier) {
+                    Box {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -134,15 +148,9 @@ fun Calendar() {
                             Button(
                                 modifier = Modifier
                                     .padding(start = 16.dp)
-                                    .border(
-                                        1.dp,
-                                        MaterialTheme.colorScheme.primary,
-                                        shape = RoundedCornerShape(8.dp)
-                                    ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.surface
-                                ),
-                                onClick = { /* TODO */ }
+                                    .border(1.dp, MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp)),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
+                                onClick = { showCalendarDialog = true }
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.open_calendar),
@@ -156,9 +164,18 @@ fun Calendar() {
                                 color = Color.White,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
+                            if (showCalendarDialog) {
+                                CalendarDialog(
+                                    initialDate = selectedDate ?: LocalDate.now(),
+                                    onDateSelected = {
+                                        selectedDate = it
+                                        showCalendarDialog = false
+                                    },
+                                    onDismissRequest = { showCalendarDialog = false }
+                                )
+                            }
                         }
                     }
-
                     DaysOfWeekTitle(daysOfWeek = daysOfWeek())
                 }
             },
@@ -186,6 +203,8 @@ fun Calendar() {
         )
 
         selectedDate?.let { date ->
+            val tasksForSelectedDate by tasksViewModel.getTasksForDate(date).collectAsState(initial = emptyList())
+
             Text(
                 "Tasks for: ${date.format(DateTimeFormatter.ISO_DATE)}",
                 modifier = Modifier.padding(16.dp),
@@ -193,44 +212,14 @@ fun Calendar() {
                 fontWeight = FontWeight.Bold
             )
 
-            val tasks = tasksByDate[date] ?: emptyList()
-
-            if (tasks.isEmpty()) {
+            if (tasksForSelectedDate.isEmpty()) {
                 Text(stringResource(id = R.string.no_tasks_for_this_date), modifier = Modifier.padding(16.dp))
             } else {
-                val displayedItems = if (listExpanded) tasks else tasks.take(3)
+                val displayedItems = if (listExpanded) tasksForSelectedDate else tasksForSelectedDate.take(3)
                 Column {
-                    displayedItems.forEach { task ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(45.dp)
-                                .padding(top = 8.dp, start = 16.dp, end = 16.dp)
-                                .clickable { /* TODO: click handler */ },
-                            shape = RoundedCornerShape(10.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 10.dp, top = 8.dp, end = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.options_button),
-                                    contentDescription = stringResource(id = R.string.option_button),
-                                    modifier = Modifier.padding(end = 15.dp),
-                                    tint = Color.White
-                                )
-                                Text(
-                                    text = task,
-                                    fontSize = 16.sp
-                                )
-                            }
-                        }
-                    }
+                    displayedItems.forEach { task -> TaskCard(task = task) }
 
-                    if (tasks.size > 3) {
+                    if (tasksForSelectedDate.size > 3) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
@@ -264,14 +253,191 @@ fun Calendar() {
             }
         }
 
-        // Создание задачи — пока заглушка
         CreateTaskButton(
             categoryDao = categoryDao,
             taskDao = taskDao,
             context = context,
             taskApi = RetrofitInstance.taskApi,
-            onTaskCreated = { /* TODO: пока ничего не делаем */ }
+            onTaskCreated = {
+                    newTaskDto ->
+                tasksViewModel.createTask(
+                    task = newTaskDto,
+                    onSuccess = { /* UI обновится автоматически через collectAsState */ },
+                    onError = { println("Ошибка: $it") }
+                )
+            }
         )
+    }
+}
+@Composable
+fun CalendarDialog(
+    initialDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    var dialogYearMonth by remember { mutableStateOf(YearMonth.from(initialDate)) }
+    var showMonthDropdown by remember { mutableStateOf(false) }
+    var showYearDropdown by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val calendarState = rememberCalendarState(
+        startMonth = YearMonth.now().minusYears(30),
+        endMonth = YearMonth.now().plusYears(30),
+        firstDayOfWeek = DayOfWeek.MONDAY,
+        firstVisibleMonth = dialogYearMonth
+    )
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            Button(onClick = onDismissRequest) { Text("OK") }
+        },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // Верхняя панель с месяцем/годом и стрелками
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_left),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable {
+                                dialogYearMonth = dialogYearMonth.minusMonths(1)
+                                coroutineScope.launch {
+                                calendarState.scrollToMonth(dialogYearMonth)
+                                    }
+                            }
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box {
+                        Text(
+                            text = dialogYearMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier.clickable { showMonthDropdown = !showMonthDropdown }
+                        )
+                        if (showMonthDropdown) {
+                            DropdownMenu(
+                                expanded = true,
+                                onDismissRequest = { showMonthDropdown = false }
+                            ) {
+                                Month.values().forEach { month ->
+                                    DropdownMenuItem(
+                                        text = { Text(month.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                        onClick = {
+                                            dialogYearMonth = YearMonth.of(dialogYearMonth.year, month)
+                                            coroutineScope.launch {
+                                                calendarState.scrollToMonth(dialogYearMonth)
+                                            }
+                                            showMonthDropdown = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Box {
+                        Text(
+                            text = dialogYearMonth.year.toString(),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            modifier = Modifier.clickable { showYearDropdown = !showYearDropdown }
+                        )
+                        if (showYearDropdown) {
+                            DropdownMenu(
+                                expanded = true,
+                                onDismissRequest = { showYearDropdown = false }
+                            ) {
+                                val startYear = dialogYearMonth.year - 5
+                                val endYear = dialogYearMonth.year + 4
+                                (startYear..endYear).forEach { year ->
+                                    DropdownMenuItem(
+                                        text = { Text(year.toString()) },
+                                        onClick = {
+                                            dialogYearMonth = YearMonth.of(year, dialogYearMonth.month)
+                                            coroutineScope.launch {
+                                                calendarState.scrollToMonth(dialogYearMonth)
+                                            }
+                                            showYearDropdown = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_right),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable {
+                                dialogYearMonth = dialogYearMonth.plusMonths(1)
+                                coroutineScope.launch {
+                                    calendarState.scrollToMonth(dialogYearMonth)
+                                }
+                            }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HorizontalCalendar(
+                    state = calendarState,
+                    dayContent = { day ->
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .clickable { onDateSelected(day.date) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(day.date.dayOfMonth.toString())
+                        }
+                    }
+                )
+            }
+        }
+    )
+}
+@Composable
+fun TaskCard(task: TaskEntity) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(45.dp)
+            .padding(top = 8.dp, start = 16.dp, end = 16.dp)
+            .clickable { },
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 10.dp, top = 8.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.options_button),
+                contentDescription = stringResource(id = R.string.option_button),
+                modifier = Modifier.padding(end = 15.dp),
+                tint = Color.White
+            )
+            Column {
+                Text(task.title, fontSize = 16.sp)
+                task.content?.let { Text(it, fontSize = 12.sp, color = Color.Gray) }
+            }
+        }
     }
 }
 
@@ -293,3 +459,4 @@ fun DaysOfWeekTitle(daysOfWeek: List<DayOfWeek>) {
         }
     }
 }
+

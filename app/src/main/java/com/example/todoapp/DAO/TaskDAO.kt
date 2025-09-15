@@ -12,6 +12,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE userToken = :token")
     fun getAllTasks(token: String): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE dateTime LIKE :date || '%' AND userToken = :userToken")
+    suspend fun getTasksByDate(date: String, userToken: String): List<TaskEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
 

@@ -15,6 +15,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +56,7 @@ fun ProfileMainScreen() {
     Column {
         Header(showSearch = false)
         Spacer(modifier = Modifier.height(16.dp))
-        Charts()
+        Charts(taskDao)
         Spacer(modifier = Modifier.height(16.dp))
         TaskCategoriesSection(taskDao)
     }
@@ -63,107 +65,113 @@ fun ProfileMainScreen() {
 }
 
 @Composable
-fun Charts() {
-    val steps = 5
+fun Charts(taskDao: TaskDao) {
+    val dateCounts by taskDao.getTasksCountByDate()
+        .collectAsState(initial = emptyList())
 
+    // Преобразуем в точки
+    val pointsData = dateCounts.mapIndexed { index, dc ->
+        Point(index.toFloat(), dc.count.toFloat())
+    }
 
-    val weekDays: List<String> = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sut", "Sun")
-    val pointsData: List<Point> =
-        listOf(
-            Point(0f, 40f),
-            Point(1f, 90f),
-            Point(2f, 0f),
-            Point(3f, 60f),
-            Point(4f, 10f),
-            Point(5f, 20f),
-            Point(6f, 30f))
+    val xAxisLabels = dateCounts.map { dc ->
+        dc.date.substring(5) // показываем только "MM-DD"
+    }
 
     Column {
-        Row(modifier = Modifier
-            .width(400.dp)
-            .padding(start = 10.dp)
-            .height(35.dp)
-            .background(MaterialTheme.colorScheme.surface),
-            verticalAlignment = Alignment.Bottom
-
-        ) {
-            Text(modifier = Modifier
-                .padding(start = 17.dp),
-                text = stringResource(id = R.string.completion_of_daily_tasks)
-            )
-        }
-
-        val xAxisData = AxisData.Builder()
-            .axisStepSize(100.dp)
-            .backgroundColor(MaterialTheme.colorScheme.surface)
-            .steps(pointsData.size - 1)
-            .labelData { i -> weekDays[i] }
-            .axisLineColor(MaterialTheme.colorScheme.secondary)
-            .axisLabelColor(MaterialTheme.colorScheme.secondary)
-            .labelAndAxisLinePadding(15.dp)
-            .build()
-
-        val yAxisData = AxisData.Builder()
-            .steps(5)
-            .backgroundColor(MaterialTheme.colorScheme.surface)
-            .axisLineColor(Color.Green) // Цвет оси Y
-            .axisLabelColor(Color.Green) // Цвет подписей оси Y
-            .build()
-
-        val lineChartData = LineChartData(
-            linePlotData = LinePlotData(
-                lines = listOf(
-                    Line(
-                        dataPoints = pointsData,
-                        LineStyle(
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        IntersectionPoint(
-                            color = Color.White
-                        ),
-                        SelectionHighlightPoint(MaterialTheme.colorScheme.primary),
-                        ShadowUnderLine(
-                            alpha = 0.5f,
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.surface
-                                )
-                            ),
-//                        color = MaterialTheme.colorScheme.surface
-
-                        ),
-                        SelectionHighlightPopUp(),
-                    )
-                ),
-            ),
-
-            xAxisData = xAxisData,
-            yAxisData = yAxisData,
-            gridLines = GridLines(
-                color = MaterialTheme.colorScheme.secondary,
-                enableVerticalLines = false,
-                alpha = 0.1f,
-                lineWidth = 0.3.dp
-
-            ),
-            backgroundColor = MaterialTheme.colorScheme.surface,
-        )
-
-
-
-        LineChart(
+        Row(
             modifier = Modifier
                 .width(400.dp)
                 .padding(start = 10.dp)
-                .height(300.dp)
-                .clip(RoundedCornerShape(bottomStart = 13.dp, bottomEnd = 13.dp)),
-            lineChartData = lineChartData
-        )
+                .height(35.dp)
+                .background(MaterialTheme.colorScheme.surface),
+            verticalAlignment = Alignment.Bottom
 
-        Spacer(modifier = Modifier.height(16.dp))
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(start = 17.dp),
+                text = stringResource(id = R.string.completion_of_daily_tasks)
+            )
+        }
+        val stepSize = if (pointsData.size > 1) {
+            (400.dp / (pointsData.size - 1))
+        } else {
+            100.dp
+        }
+        if (pointsData.isNotEmpty()) {
+            val xAxisData = AxisData.Builder()
+                .axisStepSize(stepSize)
+                .backgroundColor(MaterialTheme.colorScheme.surface)
+                .steps(pointsData.size - 1)
+                .labelData { i -> xAxisLabels[i] }
+                .axisLineColor(MaterialTheme.colorScheme.secondary)
+                .axisLabelColor(MaterialTheme.colorScheme.secondary)
+                .labelAndAxisLinePadding(15.dp)
+                .build()
+
+            val yAxisData = AxisData.Builder()
+                .steps(5)
+                .backgroundColor(MaterialTheme.colorScheme.surface)
+                .axisLineColor(Color.Green) // Цвет оси Y
+                .axisLabelColor(Color.Green) // Цвет подписей оси Y
+                .build()
+
+            val lineChartData = LineChartData(
+                linePlotData = LinePlotData(
+                    lines = listOf(
+                        Line(
+                            dataPoints = pointsData,
+                            LineStyle(
+                                color = MaterialTheme.colorScheme.primary
+                            ),
+                            IntersectionPoint(
+                                color = Color.White
+                            ),
+                            SelectionHighlightPoint(MaterialTheme.colorScheme.primary),
+                            ShadowUnderLine(
+                                alpha = 0.5f,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primary,
+                                        MaterialTheme.colorScheme.surface
+                                    )
+                                ),
+//                        color = MaterialTheme.colorScheme.surface
+
+                            ),
+                            SelectionHighlightPopUp(),
+                        )
+                    ),
+                ),
+
+                xAxisData = xAxisData,
+                yAxisData = yAxisData,
+                gridLines = GridLines(
+                    color = MaterialTheme.colorScheme.secondary,
+                    enableVerticalLines = false,
+                    alpha = 0.1f,
+                    lineWidth = 0.3.dp
+
+                ),
+                backgroundColor = MaterialTheme.colorScheme.surface,
+            )
 
 
+
+            LineChart(
+                modifier = Modifier
+                    .width(400.dp)
+                    .padding(start = 10.dp)
+                    .height(300.dp)
+                    .clip(RoundedCornerShape(bottomStart = 13.dp, bottomEnd = 13.dp)),
+                lineChartData = lineChartData
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+        }
     }
 
 

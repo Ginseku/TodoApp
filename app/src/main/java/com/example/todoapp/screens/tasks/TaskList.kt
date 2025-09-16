@@ -1,7 +1,6 @@
 package com.example.todoapp.screens.tasks
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,10 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.todoapp.DAO.TaskDto
 import com.example.todoapp.DAO.TaskEntity
 import com.example.todoapp.R
-import com.example.todoapp.components.parseDate
+import com.example.todoapp.components.parser.parseDate
 import java.time.LocalDate
 
 

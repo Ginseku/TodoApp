@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +41,8 @@ import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.todoapp.DAO.AppDatabase
+import com.example.todoapp.DAO.TaskDao
 import com.example.todoapp.R
 import com.example.todoapp.components.Header
 import com.example.todoapp.utilits.formatToSinglePrecision
@@ -47,12 +50,13 @@ import com.example.todoapp.utilits.formatToSinglePrecision
 
 @Composable
 fun ProfileMainScreen() {
+    val taskDao: TaskDao = AppDatabase.getInstance(LocalContext.current).taskDao()
     Column {
         Header(showSearch = false)
         Spacer(modifier = Modifier.height(16.dp))
         Charts()
         Spacer(modifier = Modifier.height(16.dp))
-        TaskCategoriesSection()
+        TaskCategoriesSection(taskDao)
     }
 
 

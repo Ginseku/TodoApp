@@ -15,6 +15,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE dateTime LIKE :date || '%' AND userToken = :userToken")
     suspend fun getTasksByDate(date: String, userToken: String): List<TaskEntity>
 
+    @Query("SELECT category, COUNT(*) as count FROM tasks GROUP BY category")
+    fun getTasksCountByCategory(): Flow<List<CategoryCount>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)
 
@@ -25,3 +28,8 @@ interface TaskDao {
     @Query("DELETE FROM tasks WHERE id = :id")
     suspend fun deleteTask(id: Int)
 }
+
+data class CategoryCount(
+    val category: String,
+    val count: Int
+)

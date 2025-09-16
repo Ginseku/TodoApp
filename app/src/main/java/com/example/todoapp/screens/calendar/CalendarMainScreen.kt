@@ -50,12 +50,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.todoapp.API.TaskApi
 import com.example.todoapp.DAO.AppDatabase
 import com.example.todoapp.DAO.TaskEntity
 import com.example.todoapp.R
 import com.example.todoapp.components.CreateTaskButton
-import com.example.todoapp.components.getUserIdFromToken
 import com.example.todoapp.screens.Autentification.TokenManager
 import com.example.todoapp.screens.Autentification.network.RetrofitInstance
 import com.example.todoapp.screens.tasks.TasksViewModel
@@ -64,10 +62,7 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
